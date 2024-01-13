@@ -1,0 +1,340 @@
+
+package application;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+
+public class Vehicle implements Serializable{
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String preferance;
+	    private int VehicleId;
+	    private String VehicleCategory;
+	   
+	     public Vehicle(){
+	    }
+	    public Vehicle(int VehicleId, String VehicleCategory,String preferance ) {
+
+	        this.VehicleId = VehicleId;
+	        this.VehicleCategory = VehicleCategory; 
+	        this.preferance=preferance;
+	    }
+	    public Vehicle(int VehicelId){
+	        this.VehicleId=VehicelId;
+	    } 
+	    
+	    public int getVehicleId() {
+	        return VehicleId;
+	    }
+	    public void setVehicleId(int VehicleId) {
+	        this.VehicleId = VehicleId;
+	    }
+	      
+	    public void setVehicleCategory(String VehicleCategory) {
+	        this.VehicleCategory = VehicleCategory;
+	    } 
+	    public String getVehicleCategory() {
+	        return VehicleCategory;
+	    }
+	   public String getPreferance() {
+	        return preferance;
+	    }
+	      public void setPreferance(String preferance) {
+	        this.preferance = preferance;
+	    } 
+}   
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+package application;
+
+import java.lang.ClassNotFoundException;
+import java.util.ArrayList;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+
+public class VehicleGUI implements EventHandler<ActionEvent> {
+	Stage TripStage = new Stage();
+	ArrayList<Vehicle> vehicleList = new ArrayList<>();
+
+//////////////////////////////////FOR HANDLING BUTTONS IN VEHICLE FORM//////////////////////////////////////////
+
+	@Override
+	public void handle(ActionEvent event) {
+		if (event.getSource() == AdminButtonClick.btAddV) {
+			StackPane sp2 = new StackPane();
+			Image img = new Image("bus-pictures-wzj4qjebtwtm0xdn.jpg"); // bus photo
+			ImageView iv = new ImageView(img);
+
+			Label l3 = new Label("vehicle id");
+			TextField tfIdV = new TextField();
+
+			Label l4 = new Label("select category");
+			ObservableList<String> o = FXCollections.observableArrayList("superjet , 44", "minibus , 11", "bus , 28");
+			ComboBox cboCategoryV = new ComboBox(o);
+
+			Label l7 = new Label("prefrence");
+			ObservableList<String> o3 = FXCollections.observableArrayList("first class", "second class", "third class");
+			ComboBox cboPrefranceV = new ComboBox(o3);
+
+			Button btAdd = new Button("add");
+			Button btAddAnother = new Button("add another vehicle");
+			Button btExit = new Button("exit ");
+			Label lb9 = new Label("vehicle added succesfully");
+			GridPane gp2 = new GridPane();
+			gp2.add(l3, 0, 0);
+			gp2.add(tfIdV, 1, 0);
+			gp2.add(l4, 0, 1);
+			gp2.add(cboCategoryV, 1, 1);
+			gp2.add(l7, 0, 2);
+			gp2.add(cboPrefranceV, 1, 2);
+			gp2.add(btAdd, 1, 3);
+			gp2.add(btAddAnother, 2, 3);
+			gp2.add(btExit, 2, 4);
+			gp2.setHgap(15);
+			gp2.setVgap(10);
+			gp2.setPadding(new Insets(100, 100, 100, 200));
+			gp2.setAlignment(Pos.CENTER_LEFT);
+			//Stage ADD = new Stage();
+			btAdd.setOnAction(e5 -> {
+				try {
+					if (!tfIdV.getText().isEmpty() && cboCategoryV.getValue() != "select"
+							&& cboPrefranceV.getValue() != "select") {
+						if (Admin.AddVehicle(Integer.parseInt(tfIdV.getText()), (String) cboCategoryV.getValue(),
+								(String) cboPrefranceV.getValue(), vehicleList)) {
+							Alert al4 = new Alert(Alert.AlertType.CONFIRMATION);
+							al4.setTitle("data saved");
+							al4.setHeaderText(null);
+							al4.setContentText("data saved sucsessfully");
+							al4.show();
+							vehicleList.clear();
+						} else {
+							Alert al2 = new Alert(Alert.AlertType.ERROR);
+							al2.setTitle("Vehicle id");
+							al2.setHeaderText(null);
+							al2.setContentText("this id is already taken please use another one");
+							al2.show();
+						}
+					} else {
+						Alert al = new Alert(Alert.AlertType.WARNING);
+						al.setTitle("an empty box");
+						al.setHeaderText(null);
+						al.setContentText("please enter data in all the boxes");
+						al.show();
+					}
+				} catch (ClassNotFoundException w) {
+					System.out.println(w);
+				}
+
+			});
+
+			// add another vehicle
+			btAddAnother.setOnAction(e6 -> {
+				tfIdV.clear();
+				cboCategoryV.setValue("");
+				cboPrefranceV.setValue("");
+
+				try {
+					Admin.loadDataFromFile(vehicleList, "Vehicle.dat");
+				} catch (ClassNotFoundException ex) {
+					System.out.println(ex);
+				}
+			});
+			btExit.setOnAction(e7 -> {
+				TripStage.close();
+
+			});			
+
+			sp2.getChildren().addAll(iv,gp2);
+			TripStage.setScene(new Scene(sp2, 1534, 780));
+			TripStage.setTitle("add vehicle");
+			TripStage.show();
+		}
+
+		else if (event.getSource() == AdminButtonClick.btRemoveV) {
+			StackPane sp3 = new StackPane();
+			Image img = new Image("bus-pictures-wzj4qjebtwtm0xdn.jpg"); // bus photo
+			ImageView iv = new ImageView(img);
+
+			//Stage sRemoveV = new Stage();
+			Label lbRemoveV = new Label("vehicle Id");
+			TextField tfRemoveV = new TextField();
+			Button btremoveV = new Button("remove");
+			Label lb10 = new Label("removed succesfully");
+			HBox H = new HBox(15, lbRemoveV, tfRemoveV);
+			H.setAlignment(Pos.CENTER_LEFT);
+			VBox VRemove = new VBox(15, H, btremoveV);
+			VRemove.setSpacing(15);
+			VRemove.setPadding(new Insets(100, 100, 100, 200));
+			VRemove.setAlignment(Pos.CENTER_LEFT);
+			vehicleList.clear();
+			try {
+				Admin.loadDataFromFile(vehicleList, "Vehicle.dat");
+
+			} catch (ClassNotFoundException ex) {
+				System.out.println(ex);
+			}
+			btremoveV.setOnAction(e9 -> {
+
+				Admin.removeVehicle(Integer.parseInt(tfRemoveV.getText()), vehicleList);
+				Admin.saveDatatoFile(vehicleList, "Vehicle.dat");
+				VRemove.getChildren().add(lb10);
+				VRemove.getChildren().add(lb10);
+				System.out.println("removed");
+
+
+			});				sp3.getChildren().addAll(iv,VRemove);
+
+			TripStage.setScene(new Scene(sp3,1534,780));
+			TripStage.setTitle("remove vehicle");
+			TripStage.show();
+		} else if (event.getSource() == AdminButtonClick.btEditV) {
+			StackPane sp4 = new StackPane();
+
+
+			Label lb12 = new Label("vehicle id");
+			
+			TextField tfVehicleID = new TextField();
+			tfVehicleID.setMaxSize(70, 50);
+			Button btID = new Button("search");
+			Image img = new Image("bus-pictures-wzj4qjebtwtm0xdn.jpg"); // bus photo
+			ImageView iv = new ImageView(img);
+
+			HBox hbox = new HBox();
+			hbox.setPadding(new Insets(10));
+			hbox.getChildren().addAll(lb12, tfVehicleID, btID);
+			hbox.setSpacing(15);
+			sp4.getChildren().add(hbox);
+			btID.setOnAction(e11 -> {
+				TextArea taVehicle = new TextArea();
+				vehicleList.clear();
+				try {
+					Admin.loadDataFromFile(vehicleList, "Vehicle.dat");
+				} catch (ClassNotFoundException ex) {
+					System.out.println(ex);
+				}
+				taVehicle.appendText(Admin.getVehicle(Integer.parseInt(tfVehicleID.getText()), vehicleList));
+
+				HBox hEditV = new HBox(15, taVehicle);
+				Label lb13 = new Label("category");
+
+				ObservableList<String> o = FXCollections.observableArrayList("superjet ,44", "minibus ,11", "bus,28");
+				ComboBox cboCategoryV = new ComboBox(o);
+				cboCategoryV.setValue("select");
+
+				Label lb15 = new Label("prefrance");
+				ObservableList<String> o3 = FXCollections.observableArrayList("first class", "second class",
+						"third class");
+				ComboBox cboPrefranceV = new ComboBox(o3);
+				cboPrefranceV.setValue("select");
+
+				Button btEdit = new Button("edit");
+
+				GridPane gp3 = new GridPane();
+				gp3.add(lb13, 0, 0);
+				gp3.add(cboCategoryV, 1, 0);
+				gp3.add(lb15, 0, 1);
+				gp3.add(cboPrefranceV, 1, 1);
+				gp3.add(btEdit, 1, 2);
+				gp3.setHgap(15);
+				gp3.setVgap(10);
+				HBox vEditV = new HBox(hEditV, gp3);
+				vEditV.setPadding(new Insets(100, 100, 100, 100));
+				vEditV.setSpacing(15);
+				vEditV.setAlignment(Pos.BASELINE_LEFT);
+				sp4.getChildren().addAll(iv,vEditV);
+
+				if (Admin.checkId(Integer.parseInt(tfVehicleID.getText()), vehicleList)) {
+					Alert al3 = new Alert(Alert.AlertType.ERROR);
+					al3.setTitle("no vehicle");
+					al3.setHeaderText(null);
+					al3.setContentText("sorry no vehicle have this id " + "\n" + "try again");
+					al3.show();
+				}
+				btEdit.setOnAction(e12 -> {
+					Vehicle v = new Vehicle();
+
+					Admin.removeVehicle(Integer.parseInt(tfVehicleID.getText()), vehicleList);
+					Admin.EditVehicle(Integer.parseInt(tfVehicleID.getText()), (String) cboCategoryV.getValue(),
+							(String) cboPrefranceV.getValue(), v, vehicleList);
+					if (cboCategoryV.getValue() == "select" || cboPrefranceV.getValue() == "select") {
+						Alert al6 = new Alert(Alert.AlertType.WARNING);
+						al6.setTitle("empty box");
+						al6.setHeaderText(null);
+						al6.setContentText("please fill all the boxes");
+						al6.show();
+					} else {
+						Alert al3 = new Alert(Alert.AlertType.CONFIRMATION);
+						al3.setTitle("edit");
+						al3.setHeaderText(null);
+						al3.setContentText("the vehicle list is edited !!" + "\n" + "check it out");
+						al3.show();
+
+						Admin.saveDatatoFile( vehicleList,"Vehicle.dat");
+					}
+				});
+			});
+			TripStage.setScene(new Scene(sp4,1534,780));
+			TripStage.setTitle("edit vehicle");
+			TripStage.show();
+		} else if (event.getSource() == AdminButtonClick.btListV) {
+			StackPane sp5=new StackPane();
+
+			Image img = new Image("bus-pictures-wzj4qjebtwtm0xdn.jpg"); // bus photo
+			ImageView iv = new ImageView(img);
+			Label lb11 = new Label("available vehicles");
+			TextArea taAllV = new TextArea();
+			HBox HList = new HBox(15, lb11, taAllV);
+			HList.setAlignment(Pos.CENTER_LEFT);
+			sp5.getChildren().addAll(iv,HList);
+			try {
+				vehicleList.clear();
+				Admin.loadDataFromFile(vehicleList, "Vehicle.dat");
+			} catch (ClassNotFoundException ex) {
+				System.out.println(ex);
+			}
+			 int i=1;
+             for(Vehicle vehicle:vehicleList){
+                 taAllV.appendText("vehicle number :"+i+"\n");
+                   taAllV.appendText(Admin.setVehicleDetails(vehicle));
+                 i++;
+             }
+
+			//Stage sListV = new Stage();
+             TripStage.setScene(new Scene(sp5,1534,780));
+             TripStage.setTitle("list vehicle");
+             TripStage.show();
+		}
+	}
+}
