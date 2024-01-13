@@ -1,0 +1,397 @@
+package application;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.ArrayList;
+
+public class Recp extends User {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	Recp() {
+	}
+
+	Recp(String firstName, String lastName, String userName, String password, long phoneNumber, String email) {
+		super(firstName, lastName, userName, password, phoneNumber, email);
+	}
+
+	public static void CreateBooking(String guestUserName, int numberOfTickets, String pickPoint, String endpoint,
+			String day, double time, int busid, String preference, double price, String category, String rating) {
+		Trip trip = new Trip(pickPoint, endpoint, day, time, busid, preference, price, category);
+		Booking booking = new Booking(guestUserName, numberOfTickets, trip, rating);
+
+		try {
+
+			ArrayList<Booking> bookingList = new ArrayList<>();
+			try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("Booking.dat"))) {
+				bookingList = (ArrayList<Booking>) in.readObject();
+			} catch (FileNotFoundException ignored) {
+
+			}
+
+			bookingList.add(booking);
+
+			try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("Booking.dat"))) {
+				out.writeObject(bookingList);
+			}
+
+			System.out.println("Booking created successfully");
+		} catch (IOException | ClassNotFoundException e) {
+			System.out.println(e);
+		}
+	}
+
+	public boolean checkGuest(String GuestUserName) throws ClassNotFoundException {
+		getGuestList().clear();
+		User.readUsersFromBinaryFile("Guest.dat", getGuestList());
+		System.out.println(getGuestList().toString());
+
+		return false;
+	}
+
+	public static double calculateAmont(int numberOfTickets, double price) {
+
+		double totalAmount = numberOfTickets * price;
+		return totalAmount;
+	}
+}
+///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+package application;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+
+public class RecepGUI implements Serializable {
+	private static final long serialVersionUID = 1498303809418693663L; // Add this line
+	static StackPane sp = new StackPane(); // for image
+	static Image img = new Image("travel.jpg"); // sea photo
+	static ImageView iv = new ImageView(img);
+	static protected void openNewWindow() {
+		Stage newStage = new Stage();
+		VBox root = new VBox();
+		root.setSpacing(10);
+		root.setAlignment(Pos.CENTER);
+root.setPadding(new Insets(25));
+		Label welcomeLabel = new Label("Welcome!");
+		welcomeLabel.setFont(new Font("Arial", 24));
+
+		ComboBox<String> guestOptions = new ComboBox<>();
+		guestOptions.getItems().addAll("New Guest", "Old Guest");
+		guestOptions.setPromptText("Select Guest Type");
+
+		VBox registrationBox = new VBox();
+		registrationBox.setSpacing(5);
+		registrationBox.setAlignment(Pos.TOP_LEFT);
+registrationBox.setPadding(new Insets(100));
+		guestOptions.setOnAction(e -> {
+			String selectedOption = guestOptions.getValue();
+			if (selectedOption != null) {
+				if (selectedOption.equals("New Guest")) {
+					registrationBox.getChildren().clear();
+
+					TextField firstName = new TextField();
+					firstName.setPromptText("First Name");
+
+					TextField lastName = new TextField();
+					lastName.setPromptText("Last Name");
+
+					TextField phone = new TextField();
+					phone.setPromptText("phone");
+
+					TextField userName = new TextField();
+					userName.setPromptText("UserName");
+
+					PasswordField password = new PasswordField();
+					password.setPromptText("password");
+
+					TextField tfmail = new TextField();
+					tfmail.setPromptText("Email");
+
+					Button btdone = new Button("Register");
+					btdone.setOnAction(ex -> {
+						try {
+							long phoneNumber = Long.parseLong(phone.getText());
+							Recp recp3 = new Recp(firstName.getText(), lastName.getText(), userName.getText(),
+									password.getText(), phoneNumber, tfmail.getText());
+							User.readUsersFromBinaryFile("Guest.dat", User.getGuestList());
+							boolean userExists = recp3.register("1", recp3);
+							if (!userExists) {
+								Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+								errorAlert.setTitle("Error");
+								errorAlert.setHeaderText(null);
+								errorAlert.setContentText("Username already exists!");
+								errorAlert.showAndWait();
+							} else {
+								recp3.register("1", recp3);
+								Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+								successAlert.setTitle("Registration");
+								successAlert.setHeaderText(null);
+								successAlert.setContentText("User registered successfully!");
+								successAlert.showAndWait();
+
+							}
+						} catch (NumberFormatException exception) {
+							Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+							errorAlert.setTitle("Error");
+							errorAlert.setHeaderText(null);
+							errorAlert.setContentText("Please enter a valid phone number!");
+							errorAlert.showAndWait();
+						} catch (ClassNotFoundException ex1) {
+							System.out.println("there is class not found");
+						}
+					});
+
+					registrationBox.getChildren().addAll(firstName, lastName, phone, userName, password, btdone);
+				}
+
+				else if (selectedOption.equals("Old Guest")) {
+					registrationBox.getChildren().clear();
+					Recp recp = new Recp();
+
+					TextField guestusername = new TextField();
+					guestusername.setPromptText("guest username");
+					Button btcheck = new Button("check");
+					btcheck.setOnAction(ex -> {
+						boolean isValid = false;
+						try {
+							ArrayList<User> guestlist = new ArrayList<User>();
+							User.readUsersFromBinaryFile("Guest.dat", guestlist);
+							isValid = recp.loginUser(guestusername.getText(), guestlist);
+							System.out.println(isValid);
+						} catch (ClassNotFoundException d) {
+							System.out.println(d);
+						}
+
+						if (isValid) {
+
+							Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+							successAlert.setTitle("check");
+							successAlert.setHeaderText(null);
+							successAlert.setContentText("user exist complete booking !");
+							successAlert.showAndWait();
+
+						} else {
+
+							Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+							errorAlert.setTitle("not found");
+							errorAlert.setHeaderText(null);
+							errorAlert.setContentText("Username already not exists! please regiest first ");
+							errorAlert.showAndWait();
+
+						}
+
+					});
+					HBox root1 = new HBox();
+					root1.getChildren().addAll(guestusername, btcheck);
+					ArrayList<Trip> triplist = new ArrayList<>();
+					try {
+						Admin.loadDataFromFile("Trips.dat", triplist);
+					} catch (ClassNotFoundException e1) {
+
+						e1.printStackTrace();
+					}
+
+					ComboBox<String> tripDay = new ComboBox<>();
+					tripDay.setMinWidth(80);
+					tripDay.setMaxWidth(80);
+
+					Set<String> uniqueDays = new HashSet<>();
+					for (int i = 0; i < triplist.size(); i++) {
+						// tripDay.getItems().addAll(triplist.get(i).getDay());
+						String day = triplist.get(i).getDay();
+						if (uniqueDays.add(day)) {
+							tripDay.getItems().add(day);
+						}
+					}
+					tripDay.setPromptText("Day");
+					// String day = tripDay.getSelectionModel().getSelectedItem();
+
+					ComboBox<Double> tripTime = new ComboBox<>();
+					Set<Double> uniqueTimes = new HashSet<>();
+
+					for (int i = 0; i < triplist.size(); i++) {
+						Double startTime = triplist.get(i).getTripStartTime();
+
+						if (uniqueTimes.add(startTime)) {
+							tripTime.getItems().add(startTime);
+						}
+					}
+					tripTime.setPromptText("time");
+
+					TextField numberOfTrips = new TextField();
+					numberOfTrips.setPromptText("number Of Trips ");
+					numberOfTrips.setMinWidth(100);
+					numberOfTrips.setMaxWidth(100);
+
+					ComboBox<String> vehicleCategoryOptions = new ComboBox<>();
+					Set<String> uniqueCategories = new HashSet<>();
+
+					for (int i = 0; i < triplist.size(); i++) {
+						String category = triplist.get(i).getCategory();
+
+						if (uniqueCategories.add(category)) {
+							vehicleCategoryOptions.getItems().add(category);
+						}
+					}
+					vehicleCategoryOptions.setPromptText("Vehicle Category");
+					vehicleCategoryOptions.setMaxWidth( 100);
+					vehicleCategoryOptions.setMinWidth( 100);
+
+					ComboBox<String> startPointOptions = new ComboBox<>();
+					Set<String> uniquePickupPoints = new HashSet<>();
+					startPointOptions.setMinWidth( 100);
+					startPointOptions.setMaxWidth( 100);
+
+					for (int i = 0; i < triplist.size(); i++) {
+						String pickupPoint = triplist.get(i).pickupPoint();
+
+						if (uniquePickupPoints.add(pickupPoint)) {
+							startPointOptions.getItems().add(pickupPoint);
+						}
+					}
+					startPointOptions.setPromptText("PickPoint");
+
+					ComboBox<String> destinationOptions = new ComboBox<>();
+					Set<String> uniqueEndPoints = new HashSet<>();
+					destinationOptions.setMaxWidth( 100);
+					destinationOptions.setMaxWidth( 100);
+
+					for (int i = 0; i < triplist.size(); i++) {
+						String endPoint = triplist.get(i).getTripEndPoint();
+
+						if (uniqueEndPoints.add(endPoint)) {
+							destinationOptions.getItems().add(endPoint);
+						}
+					}
+					destinationOptions.setPromptText("End Point");
+
+					ComboBox<String> preferenceOptions = new ComboBox<>();
+					Set<String> uniquePreferences = new HashSet<>();
+
+					for (int i = 0; i < triplist.size(); i++) {
+						String preference = triplist.get(i).getTripPreferences();
+
+						if (uniquePreferences.add(preference)) {
+							preferenceOptions.getItems().add(preference);
+						}
+					}
+					preferenceOptions.setPromptText("Preference");
+
+					TextField tfprice = new TextField();
+					tfprice.setPromptText("Amount");
+					tfprice.setMinWidth(80);
+					tfprice.setMaxWidth(80);
+					Button btAmount = new Button("calculate");
+					btAmount.setOnAction(ex -> {
+						if (!tripDay.getSelectionModel().isEmpty() && !tripTime.getSelectionModel().isEmpty()
+								&& !numberOfTrips.getText().isEmpty()
+								&& !vehicleCategoryOptions.getSelectionModel().isEmpty()
+								&& !startPointOptions.getSelectionModel().isEmpty()
+								&& !destinationOptions.getSelectionModel().isEmpty()
+								&& !preferenceOptions.getSelectionModel().isEmpty()) {
+							for (int i = 0; i < triplist.size(); i++) {
+								if (triplist.get(i).pickupPoint().equals(startPointOptions.getValue())
+										&& triplist.get(i).getTripEndPoint().equals(destinationOptions.getValue())
+										&& triplist.get(i).getCategory().equals(vehicleCategoryOptions.getValue())
+										&& triplist.get(i).getTripPreferences().equals(preferenceOptions.getValue())) {
+
+									String x = Double.toString(Recp.calculateAmont(
+											Integer.parseInt(numberOfTrips.getText()), triplist.get(i).getTripPrice()));
+									tfprice.setText(x);
+
+								}
+							}
+						}
+
+					});
+					HBox root3 = new HBox();
+					root3.getChildren().addAll(tfprice, btAmount);
+
+					TextField tfBusId = new TextField();
+					tfBusId.setPromptText("Bus id");
+					tfBusId.setMinWidth(50);
+					tfBusId.setMaxWidth( 50);
+					Button btBusId = new Button(" Get bus id");
+					btBusId.setOnAction(ex -> {
+						if (!tripDay.getSelectionModel().isEmpty() && !tripTime.getSelectionModel().isEmpty()
+								&& !numberOfTrips.getText().isEmpty()
+								&& !vehicleCategoryOptions.getSelectionModel().isEmpty()
+								&& !startPointOptions.getSelectionModel().isEmpty()
+								&& !destinationOptions.getSelectionModel().isEmpty()
+								&& !preferenceOptions.getSelectionModel().isEmpty()) {
+							for (int i = 0; i < triplist.size(); i++) {
+								if (triplist.get(i).pickupPoint().equals(startPointOptions.getValue())
+										&& triplist.get(i).getTripEndPoint().equals(destinationOptions.getValue())
+										&& triplist.get(i).getCategory().equals(vehicleCategoryOptions.getValue())
+										&& triplist.get(i).getTripPreferences().equals(preferenceOptions.getValue())) {
+									String x = Integer.toString(triplist.get(i).getTripVehicle());
+									tfBusId.setText(x);
+								}
+							}
+						}
+
+					});
+					HBox root2 = new HBox();
+					root2.getChildren().addAll(tfBusId, btBusId);
+
+					Button btCreateBooking = new Button("Create Booking");
+					btCreateBooking.setOnAction(ex -> {
+						if (!tripDay.getSelectionModel().isEmpty() && !tripTime.getSelectionModel().isEmpty()
+								&& !numberOfTrips.getText().isEmpty()
+								&& !vehicleCategoryOptions.getSelectionModel().isEmpty()
+								&& !startPointOptions.getSelectionModel().isEmpty()
+								&& !destinationOptions.getSelectionModel().isEmpty()
+								&& !preferenceOptions.getSelectionModel().isEmpty()) {
+
+							double price = Double.parseDouble(tfprice.getText());
+							int bus = Integer.parseInt(tfBusId.getText());
+							int tickets = Integer.parseInt(numberOfTrips.getText());
+							Recp recp4 = new Recp();
+							recp4.CreateBooking(guestusername.getText(), tickets, startPointOptions.getValue(),
+									destinationOptions.getValue(), tripDay.getValue(), tripTime.getValue(), bus,
+									preferenceOptions.getValue(), price, vehicleCategoryOptions.getValue(), "  ");
+
+						} else {
+
+							Alert errorAlert = new Alert(Alert.AlertType.ERROR);
+							errorAlert.setTitle(" not completed data");
+							errorAlert.setHeaderText(null);
+							errorAlert.setContentText(" please enter all required data ");
+							errorAlert.showAndWait();
+
+						}
+					});
+
+					registrationBox.getChildren().addAll(root1, numberOfTrips, vehicleCategoryOptions,
+							startPointOptions, destinationOptions, preferenceOptions, tripTime, tripDay, root2, root3,
+							btCreateBooking);
+				}
+			}
+		});
+
+		root.getChildren().addAll(welcomeLabel, guestOptions, registrationBox);
+		
+		sp.getChildren().addAll(iv, root);
+		Scene scene = new Scene(sp,1534, 780);
+		newStage.setScene(scene);
+		newStage.setTitle("Welcome");
+		newStage.show();
+	}
+}
