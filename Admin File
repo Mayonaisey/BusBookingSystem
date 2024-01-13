@@ -1,0 +1,229 @@
+package application;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+
+import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.util.Scanner;
+import javafx.scene.control.TextArea;
+
+public class Admin extends User implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	Admin() {
+	}
+
+	   public static void loadDataFromFile(String tripfile, ArrayList<Trip> tripList) throws ClassNotFoundException {
+		    try {
+		        FileInputStream f = new FileInputStream(tripfile);
+		        ObjectInputStream in = new ObjectInputStream(f);
+
+		       // Read the entire ArrayList<Trip> from the file
+		      ArrayList<Trip> loadedList = (ArrayList<Trip>) in.readObject();
+		       tripList.addAll(loadedList);
+
+		        f.close();
+		        in.close();}
+		    catch(IOException e) {
+		    	
+		    	System.out.println(e);
+		    }
+	 }
+	   public static void saveDataToFile(String tripfile, ArrayList<Trip> TripList) {
+	        try {
+	            FileOutputStream f = new FileOutputStream(tripfile);
+	            ObjectOutputStream out = new ObjectOutputStream(f);
+
+	            // Write the entire ArrayList<Vehicle> to the file
+	            out.writeObject(TripList);
+	            out.close();
+	            f.close();
+	            System.out.println("Data saved successfully");
+	        } catch (IOException e) {
+	            System.out.println(e);
+	        }
+	    }
+public static void removeTrip(int tripNumber,ArrayList<Trip> triplist) {
+    triplist.remove(tripNumber-1);
+}
+//public static void removeVehicle(int vehicleId,ArrayList<Vehicle>vehicleList){
+//	Iterator<Vehicle> iterator = vehicleList.iterator();
+//    while (iterator.hasNext()) {
+//        Vehicle vehicle = iterator.next();
+//        if (vehicle.getVehicleId() == vehicleId) {
+//            iterator.remove();
+//        }
+//    }}
+///////////////////////////////////////////FATIMA/////////////////////////////////////////////////////////////
+public static boolean AddVehicle(int id ,String category,String prefrance,ArrayList<Vehicle>vehicleList) throws ClassNotFoundException{
+    vehicleList.clear();
+    loadDataFromFile( vehicleList,"Vehicle.dat");
+      if(checkId(id,vehicleList)){
+                                Vehicle v=new Vehicle(id,category,prefrance);
+                                   vehicleList.add(v);
+                                  saveDatatoFile(vehicleList,"Vehicle.dat");
+                                  return true;
+}
+      else {
+          return false;
+      }
+}
+public static void removeVehicle(int VehicleId,ArrayList<Vehicle>vehicleList){
+    Iterator<Vehicle> iterator = vehicleList.iterator();
+while (iterator.hasNext()) {
+    Vehicle vehicle = iterator.next();
+    if (vehicle.getVehicleId() == VehicleId) {
+        iterator.remove();
+    }
+ }
+}
+ public static void EditVehicle(int vehicleID,String category,String prefrance ,Vehicle vehicle,ArrayList<Vehicle>vehicleList){
+        vehicle.setVehicleId(vehicleID);
+         vehicle.setVehicleCategory(category);
+         vehicle.setPreferance(prefrance);
+         vehicleList.add(vehicle);
+       }
+public static String setVehicleDetails(Vehicle vehicle){
+    
+      String x="vehicle ID: " +vehicle.getVehicleId()  + "\n"
+			+ "category " +vehicle.getVehicleCategory()+ "\n" 
+			+ "prefrance : " + vehicle.getPreferance() + "\n" +"\n";
+	return x;
+}
+
+public static void loadDataFromFile(ArrayList<Vehicle>vehicleList,String vehiclefile) throws ClassNotFoundException{
+    try {
+         FileInputStream f=new FileInputStream(vehiclefile);
+         ObjectInputStream in=new ObjectInputStream(f);
+          Vehicle vehicle =(Vehicle) in.readObject();
+          while(vehicle!=null){
+             vehicleList.add(vehicle);
+             vehicle =(Vehicle) in.readObject();
+          }
+         f.close();
+         in.close();
+     }catch(IOException e){
+         System.out.println(e);
+     }
+ }
+
+public static boolean checkId(int VehicleId,ArrayList<Vehicle>vehicleList) {
+    for (Vehicle vehicle : vehicleList) {
+        if (vehicle.getVehicleId() == VehicleId) {
+            return false;
+        }
+    }
+    return true;
+}
+
+public static void saveDatatoFile(ArrayList<Vehicle>vehicleList,String vehiclefile){
+try {
+    FileOutputStream f = new FileOutputStream(vehiclefile);
+    ObjectOutputStream out = new ObjectOutputStream(f);
+   for(Vehicle vehicle:vehicleList){
+        out.flush();
+      out.writeObject(vehicle);
+   }
+    out.close();
+    f.close();
+    System.out.println("data saved succefully");
+} catch (IOException e) {
+    System.out.println(e);
+}
+}
+public static String getVehicle(int vehicleID,ArrayList<Vehicle>vehicleList){
+String x="";
+
+ for(Vehicle vehicle:vehicleList){
+  if(!checkId(vehicleID,vehicleList)){
+      if(vehicle.getVehicleId()==vehicleID){
+              x="vehicle ID: " +vehicle.getVehicleId()  + "\n"
+			+ "category " +vehicle.getVehicleCategory()+ "\n" 
+			+ "prefrance : " + vehicle.getPreferance() + "\n" +"\n";
+           
+      }
+  }   
+  //break;
+ }
+  return x;
+  
+}
+public static void loadBookingFromFile(String filename,ArrayList<Booking>bookingList) throws ClassNotFoundException{
+try{
+   FileInputStream f = new FileInputStream(filename);
+	        ObjectInputStream in = new ObjectInputStream(f);
+
+	       // Read the entire ArrayList<Trip> from the file
+	      ArrayList<Booking> loadedList = (ArrayList<Booking>) in.readObject();
+	       bookingList.addAll(loadedList);
+
+	        f.close();
+	        in.close();}
+	    catch(IOException e) {
+	    	System.out.println(e);
+	    }
+
+}
+
+
+///////////////////////////////LAILA/////////////////////////////////////////////////////////////////////////////
+
+public void addReceptionist(User user) {
+    user.saveUsersToFile("receptionist.dat", user.getReceptionistList());
+}
+
+public void addGuest(User user) {
+    user.saveUsersToFile("guest.dat", user.getGuestList());
+}
+
+public void removeGuest(String username) throws ClassNotFoundException {
+    ArrayList<User> guestList = getGuestList();
+    readUsersFromBinaryFile("guest.dat", guestList);
+
+    for (User guest : guestList) {
+        if (guest.getUserName().equals(username)) {
+            guestList.remove(guest);
+            saveUsersToFile("guest.dat", guestList);
+            return;
+        }
+    }
+}
+
+public void removeReceptionist(String username) throws ClassNotFoundException {
+    ArrayList<User> receptionistList = getReceptionistList();
+    readUsersFromBinaryFile("receptionist.dat", getReceptionistList());
+
+    for (User recp : getReceptionistList()) {
+        if (recp.getUserName().equals(username)) {
+            getReceptionistList().remove(recp);
+            saveUsersToFile("receptionist.dat", getReceptionistList());
+            return;
+        }
+    }
+}
+
+public void displayUsersInTextArea(ArrayList<User> userList, TextArea textArea) {
+textArea.clear(); 
+for (User user : userList) {
+    String userInfo = "First Name: " + user.getFirstName() + "\n" +"Last Name: " + user.getLastName() + "\n" + "Username: " + user.getUserName() + "\n" + 
+            "Password: " + user.getPassword() + "\n" + "Email: " + user.getEmail() + "\n" +"Phone: " + user.getPhoneNumber()+ "\n" +"Birthdate: " 
+            + "\n" +"---------------------------------------------------------------------\n"; 
+    textArea.appendText(userInfo + "\n");
+}
+}
+
+}
+
