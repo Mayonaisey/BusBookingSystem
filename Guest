@@ -1,0 +1,287 @@
+package application;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class Guest extends User implements Serializable {
+	private static final long serialVersionUID = 1498303809418693663L; // Add this line
+	static ArrayList<Booking> bookinglist = new ArrayList<>();
+
+	Guest() {
+
+	}
+
+	public Guest(String Username, String Password) {
+		super(Username, Password);
+	}
+
+	public static ArrayList<Booking> checkFile(String username, ArrayList<Booking> match, String file)
+			throws IOException, ClassNotFoundException {
+		System.out.println("nnnnnn");
+		bookinglist.clear();
+		Booking.loadDataFromFilebooking(file, bookinglist); // booking list is filled
+		// System.out.println(bookinglist.get(0).getPickUp());
+		System.out.println("hiii");
+		for (Booking b : bookinglist) {
+			if (b.getGuestuserName().equals(username)) {
+				match.add(b);
+			}
+		}
+
+		return match;
+	}
+}
+///////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+package application;
+import javafx.application.*;
+import javafx.stage.Stage;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.control.Alert.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
+import java.io.*;
+import javafx.geometry.*;
+import java.util.ArrayList;
+
+public class Gui  implements Serializable {
+
+ 
+    Guest guest = new Guest();
+    static TextField tfusername = new TextField();
+    static ToggleGroup tg = new ToggleGroup();
+
+
+    public static void openNewForm() {
+        Stage newFormStage = new Stage();
+
+        GridPane newFormRoot = new GridPane();
+        Button btviewBooking = new Button("View Booking");
+        Button btrateBooking = new Button("Rate Booking");
+        Button btviewHistory = new Button("View History");
+        newFormRoot.add(btviewBooking, 1, 1);
+        newFormRoot.add(btrateBooking, 2, 1);
+        newFormRoot.add(btviewHistory, 3, 1);
+        
+        newFormRoot.setHgap(10);
+        newFormRoot.setVgap(10);
+        newFormRoot.setAlignment(Pos.CENTER);
+        newFormRoot.setPadding(new Insets(10, 10, 10, 10));
+
+       //////////////////////////////////view booking button //////////////////////////////////////////////////////
+        btviewBooking.setOnAction(e -> {
+            try {
+                displayBookingForm();
+            } catch (IOException | ClassNotFoundException ex) {
+                System.out.println("error fe line 44 fe gui");            }
+        });
+        
+   /////////////////////////////////// rating button///////////////////////////////////////////////////////////
+        btrateBooking.setOnAction(e -> {
+            Stage rateStage = new Stage();
+
+            RadioButton rbVery = new RadioButton("Very Good");
+            RadioButton rbGood = new RadioButton("Good");
+            RadioButton rbExcellent = new RadioButton("Excellent");
+            RadioButton rbBad = new RadioButton("Bad");
+            
+          // ToggleGroup tg = new ToggleGroup();
+            rbVery.setToggleGroup(tg);
+            rbGood.setToggleGroup(tg);
+            rbExcellent.setToggleGroup(tg);
+            rbBad.setToggleGroup(tg);
+            GridPane rootr = new GridPane();
+            rootr.setPadding(new Insets(100));
+            rootr.setVgap(10);
+            rootr.add(rbVery, 0, 0);
+            rootr.add(rbGood, 0, 1);
+            rootr.add(rbExcellent, 0, 2);
+            rootr.add(rbBad, 0, 3);            
+            rootr.add(new Label("enter your rating for your last trip "),6,4);
+            Button btaddrate = new Button("Add rate ");
+            rootr.add(btaddrate,7,5);
+
+            try {
+                String username = Main.user.getText();
+                ArrayList<Booking> match = new ArrayList<>();
+                ArrayList<Booking> bookinglist = new ArrayList<>();
+              
+                 Guest.checkFile(username, match, "Booking.dat");
+
+                if (match.isEmpty()) {
+                    System.out.println("No match (username) found");
+                } else {
+                    System.out.println("trips of the user: " + username);
+
+                btaddrate.setOnAction(event -> {
+                  int  i=match.size()-1;     
+                    String rating = ((RadioButton) tg.getSelectedToggle()).getText();
+                        match.get(i).setRating(rating);
+                      for (int j = 0; j <bookinglist.size(); j++) {
+                     
+                        if (bookinglist.get(j).getGuestuserName().equals(match.get(i).getGuestuserName())&&bookinglist.get(j).getEndPoint().equals(match.get(i).getEndPoint())&&bookinglist.get(j).getPickUp().equals(match.get(i).getPickUp())) {
+                            bookinglist.get(j).setRating(match.get(i).getRating());
+                            break;
+                        }
+        Booking.saveDataToFilebooking("Booking.dat", bookinglist);
+                }
+                    rateStage.close();     
+                });
+                  
+                }} catch (IOException k) {
+        System.out.println("Error occurred while reading the file");
+    } catch (ClassNotFoundException ex) {
+                System.out.println("error fe line 102 fe gui");    }
+                
+ 
+            Scene scene = new Scene(rootr, 1000, 700);
+            rateStage.setScene(scene);
+            rateStage.setTitle("Rate Booking");
+            rateStage.show();
+    });
+        
+ ///////////////////////////////// ////view history button////////////////////////////////////////////////////////////
+        btviewHistory.setOnAction(e -> {
+            try {
+                displayHistoryForm();
+        Scene newFormScene = new Scene(newFormRoot, 1000, 700);
+
+        newFormStage.setScene(newFormScene);
+        newFormStage.show();
+            }
+          catch (IOException | ClassNotFoundException ex) {
+              System.out.println("error bta3 line 203");            }       
+        });
+        Scene scene = new Scene(newFormRoot, 1000, 700);
+            newFormStage.setScene(scene);
+            newFormStage.setTitle("Rate Booking");
+            newFormStage.show();
+    }
+
+    private void showAlert(String title, String message) {
+        Alert ad = new Alert(AlertType.ERROR);
+        ad.setTitle(title);
+        ad.setHeaderText(null);
+        ad.setContentText(message);
+        ad.showAndWait();
+    }
+
+    ////////////////////////// view booking fn //////////////////////////////////////////////////////////////////
+    
+    private static void displayBookingForm() throws IOException, ClassNotFoundException {
+        Stage bookingFormStage = new Stage();
+        StackPane stack1 = new StackPane();
+
+        GridPane bookingFormRoot = new GridPane();
+        TextArea bookingTextArea = new TextArea();
+        bookingTextArea.setEditable(false);
+        bookingFormRoot.add(bookingTextArea, 1, 1);
+        Image img = new Image("pexels-elviss-railijs-bitāns-1210622.jpg"); // bus photo
+		ImageView iv = new ImageView(img);
+        TextField title = new TextField();
+        title.setEditable(false);
+        bookingFormRoot.add(title, 1, 0);
+        title.setText("viewing booking :");
+        bookingFormRoot.setAlignment(Pos.CENTER);
+        bookingFormRoot.setPadding(new Insets(10, 10, 10, 10));
+
+        try {
+      String username=Main.user.getText();
+        ArrayList<Booking> match = new ArrayList<>();
+        match=Guest.checkFile(username, match,"Booking.dat");
+      
+        Booking lastBooking = null;  //  b store el last booking
+        for(Booking b:match){
+            System.out.println(b.getGuestuserName());
+            lastBooking = b; 
+        }
+        if (match.isEmpty()) {
+    System.out.println("No match (username) found");
+} else {
+    System.out.println("trips of the user: " + username);
+    StringBuilder output = new StringBuilder();
+    if (lastBooking != null) {
+        output.append(lastBooking.getObjectDetail( lastBooking)).append("\n");
+           String rating = ((RadioButton) tg.getSelectedToggle()).getText();
+                        output.append("Rating: ").append(rating).append("\n"); 
+    }
+    bookingTextArea.setText(output.toString());
+              
+    }} catch (IOException e) {
+        System.out.println("Error occurred while reading the file");
+    }
+        stack1.getChildren().addAll(iv,bookingFormRoot);
+
+        Scene bookingFormScene = new Scene(stack1, 1000, 700);
+
+        bookingFormStage.setScene(bookingFormScene);
+        bookingFormStage.show();
+    }
+
+	////////////////////////////////// view historyy
+	////////////////////////////////// fn///////////////////////////////////////////////////////////////////////
+
+	private static String[] displayHistoryForm() throws IOException, ClassNotFoundException {
+
+		Stage historyFormStage = new Stage();
+		StackPane stack2 = new StackPane();
+
+		GridPane historyFormRoot = new GridPane();
+		TextArea historyTextArea = new TextArea();
+		historyTextArea.setEditable(false);
+		Image img = new Image("pexels-elviss-railijs-bitāns-1210622.jpg"); // bus photo
+		ImageView iv = new ImageView(img);
+
+		historyFormRoot.add(historyTextArea, 1, 1);
+		TextField title1 = new TextField();
+		title1.setEditable(false);
+		historyFormRoot.add(title1, 1, 0);
+		title1.setText("viewing history :");
+		historyFormRoot.setAlignment(Pos.CENTER);
+		historyFormRoot.setPadding(new Insets(10, 10, 10, 10));
+
+		try {
+			String username = Main.user.getText();
+			ArrayList<Booking> match = new ArrayList<>();
+			match = Guest.checkFile(username, match, "Booking.dat");
+
+			for (Booking b : match) {
+				System.out.println(b.getGuestuserName());
+			}
+			if (match.isEmpty()) {
+				System.out.println("No match (username) found");
+			} else {
+				System.out.println("trips of the user: " + username);
+				StringBuilder output = new StringBuilder();
+				int counter = 0;
+				for (Booking trip : match) {
+					output.append(trip.getObjectDetail(trip)).append("\n");
+					if (counter == match.size() - 1) {
+						String rating = ((RadioButton) tg.getSelectedToggle()).getText();
+						output.append("Rating: ").append(rating).append("\n");
+					} else {
+						output.append("Rating: ").append("good").append("\n");
+					}
+					counter++;
+				}
+				historyTextArea.setText(output.toString());
+			}
+
+		} catch (IOException e) {
+			System.out.println("Error line 315");
+		}
+
+		stack2.getChildren().addAll(iv, historyFormRoot);
+
+		Scene historyFormScene = new Scene(stack2, 1000, 700);
+
+		historyFormStage.setScene(historyFormScene);
+		historyFormStage.show();
+		return null;
+
+	}
+}
