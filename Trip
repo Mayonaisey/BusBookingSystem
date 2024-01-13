@@ -1,0 +1,117 @@
+package application;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
+public class Trip implements Serializable{
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+    private String  tripPreference;
+    private String  Category;
+    private String pickupPoint;
+    private String tripEndPoint;
+    private double tripStartTime;
+    private String Day;
+    private double tripPrice;
+    private int tripVehicle; //vehicle id
+
+    public Trip(String pickupPoint,  String tripEndPoint,String day, double tripStartTime,int tripVehicle,String tripPreference,   double tripPrice,String Category) {
+       this.Day=day;
+        this.tripPreference = tripPreference;
+        this.pickupPoint = pickupPoint;
+        this.tripEndPoint = tripEndPoint;
+        this.tripStartTime = tripStartTime;
+        this.tripPrice = tripPrice;
+        this.tripVehicle = tripVehicle;  //vehicle id
+        this.Category=Category;
+    }
+
+    ////////////TO CHECK IF THIS BUS ALREADY HAS A TRIP IN THIS TIME//////////////////
+//    public static boolean checkBusData(String day,double time,int busid,ArrayList<Trip> triplistt) {
+//    	for(Trip tripp:triplistt) {
+//    		if(tripp.getDay()==day&&tripp.getTripStartTime()==time&&tripp.getTripVehicle()==busid) {
+//    			return true;
+//    		}
+//    	}
+//    	return false;
+//    }
+    public String getObjectDetails() {
+    	String x="Pickup point: " + pickupPoint() + "\n"
+				+ "Destination: " +getTripEndPoint() + "\n" + "Day: " + getDay() + "\n"
+				+ "Time: " + getTripStartTime() + "\n" + "Vehicle Id: " + getTripVehicle() + "\n"
+				+ "Preferance: " + getTripPreferences() + "\n" + "Price: " + getTripPrice()+"\n"+"Vehicle Category :"+getCategory()
+				+ "\n";
+    	return x;
+    }
+    
+    public String getTripPreferences() {
+        return tripPreference;
+    }
+
+    public void setTripPreferences(String tripPreference) {
+        this.tripPreference = tripPreference;
+    }
+
+    public String pickupPoint() {
+        return pickupPoint;
+    }
+
+    public void pickupPoint(String tripStartPoint) {
+        this.pickupPoint = tripStartPoint;
+    }
+
+    public String getTripEndPoint() {
+        return tripEndPoint;
+    }
+
+    public void setTripEndPoint(String tripEndPoint) {
+        this.tripEndPoint = tripEndPoint;
+    }
+
+    public double getTripStartTime() {
+        return tripStartTime;
+    }
+
+    public void setTripStartTime(double tripStartTime) {
+        this.tripStartTime = tripStartTime;
+    }
+
+    public double getTripPrice() {
+        return tripPrice;
+    }
+
+    public void setTripPrice(double tripPrice) {
+        this.tripPrice = tripPrice;
+    }
+
+    public int getTripVehicle() {
+        return tripVehicle;
+    }
+
+    public void setTripVehicle(int tripVehicle) {
+        this.tripVehicle = tripVehicle;
+    }
+
+	public String getDay() {
+		return Day;
+	}
+
+	public void setDay(String day) {
+		Day = day;
+	}
+
+	public String getCategory() {
+		return Category;
+	}
+	public void setCategory(String category) {
+		Category = category;
+	}}
