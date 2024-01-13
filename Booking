@@ -1,0 +1,168 @@
+package application;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+
+public class Booking implements Serializable{
+private static final long serialVersionUID = 1L;
+private String guestuserName;
+   private int numberOfTickets;
+    private String rating;
+    private String pickUp;
+    private String endPoint;
+    private double time;
+    private String prefrence;
+   private String category;
+   private Trip trip;
+
+    public Booking() {
+    }
+
+    //l hagor
+    public Booking(String guestuserName, int numberOfTickets, Trip trip,String rating) {
+        this.guestuserName = guestuserName;
+        this.numberOfTickets = numberOfTickets;
+        this.rating = rating;
+        this.trip = trip;
+    }
+
+
+   //lya
+    public Booking(String guestuserName, int numberOfTickets, String pickUp, String endPoint, double time, String prefrence, String categoryc,String rating) {
+        this.guestuserName = guestuserName;
+        this.numberOfTickets = numberOfTickets;
+        this.rating = rating;
+        this.pickUp = pickUp;
+        this.endPoint = endPoint;
+        this.time = time;
+        this.prefrence = prefrence;
+        this.category = category;
+    }
+
+
+
+
+
+
+
+    public String getPickUp() {
+        return pickUp;
+    }
+
+    public void setPickUp(String pickUp) {
+        this.pickUp = pickUp;
+    }
+
+    public String getEndPoint() {
+        return endPoint;
+    }
+
+    public void setEndPoint(String endPoint) {
+        this.endPoint = endPoint;
+    }
+
+    public double getTime() {
+        return time;
+    }
+
+    public void setTime(double time) {
+        this.time = time;
+    }
+
+    public String getPrefrence() {
+        return prefrence;
+    }
+
+    public void setPrefrence(String prefrence) {
+        this.prefrence = prefrence;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+
+    public String getGuestuserName() {
+        return guestuserName;
+    }
+
+    public void setGuestuserName(String guestuserName) {
+        this.guestuserName = guestuserName;
+    }
+
+    public int getNumberOfTickets() {
+        return numberOfTickets;
+    }
+
+    public void setNumberOfTickets(int numberOfTickets) {
+        this.numberOfTickets = numberOfTickets;
+    }
+
+
+    public String getRating() {
+        return rating;
+    }
+
+    public void setRating(String rating) {
+        this.rating = rating;
+    }
+public static void loadDataFromFilebooking(String Bookingfile,ArrayList<Booking> bookingList) throws ClassNotFoundException{
+        try {
+
+             FileInputStream f=new FileInputStream(Bookingfile);
+
+             ObjectInputStream in=new ObjectInputStream(f);
+             ArrayList<Booking> loadedList =(ArrayList<Booking>)in.readObject();
+
+             bookingList.addAll(loadedList);
+
+             f.close();
+             in.close();
+         }catch (IOException e) {
+        	 System.out.println("no such fileeeee in load data from file");
+        System.out.println("Error accessing the file: " + e.getMessage());
+    }
+     }
+
+ public static void saveDataToFilebooking(String Bookingfile, ArrayList<Booking> bookingList) {
+        try {
+            FileOutputStream ff = new FileOutputStream(Bookingfile);
+            ObjectOutputStream o = new ObjectOutputStream(ff);
+            o.writeObject(bookingList);
+            o.close();
+            ff.close();
+            System.out.println(" saved success to file");
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
+ public static String getObjectDetail(Booking booking) {
+	String str="\nuser name: " + booking.getGuestuserName()+ "\n"+"Pickup point: " + booking.trip.pickupPoint()+ "\n"
+			+ "to: " + booking.trip.getTripEndPoint()+ "\n"
+                            +"day :"+booking.trip.getDay()+"\n"
+
+			+ "Preferance: " + booking.trip.getTripPreferences()+ "\n" + " number of tickets: " + booking.getNumberOfTickets()+"\n"+"Vehicle Category :"+booking.trip.getCategory()+"\n";
+	return str;}
+
+
+// public String getObjectDetail() {
+//
+//    	String x="user name: " + getGuestuserName()+ "\n"+"Pickup point: " + getPickUp()+ "\n"
+//				+ "Destination: " +getEndPoint()+ "\n"
+//				+ "Time: " + getTime()+ "\n"
+//				+ "Preferance: " + getPrefrence()+ "\n" + " number of tickets: " + getNumberOfTickets()+"\n"+"Vehicle Category :"+getCategory()
+//				;
+//    	return x;
+//    }
+}
